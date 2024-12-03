@@ -1,0 +1,287 @@
+
+UpdatePlayer proc
+
+formPath1 proc
+
+player_maze_collision1 proc
+
+RandomPlayerPosition proc
+
+DrawGhost proc
+
+DrawEatables proc
+
+display_lvl1 proc
+
+Level1 proc
+Level2 proc
+Level3 proc
+
+search_food proc uses ax
+
+DrawEatables proc
+
+MoveGhost proc
+
+DrawGhost proc
+
+setupGhost proc
+
+....................................................................
+formPath1 proc
+mov  eax,magenta
+call SetTextColor
+	
+	;line 3 print... (V-left)
+	mov dl,5
+	mov dh,2
+	mov ecx,0
+	mov cx,13
+	call Gotoxy
+	path1c:
+		mov al,'*'
+		call WriteChar
+		inc dh
+		call Gotoxy
+		mov al,' '
+		call WriteChar
+		inc dh
+		call Gotoxy
+	LOOP path1c
+
+	;line 4 print... (V-middle)
+	mov dl,35
+	mov dh,2
+	mov ecx,0
+	mov cx,13
+	call Gotoxy
+	path1d:
+		mov al,'*'
+		call WriteChar
+		inc dh
+		call Gotoxy
+		mov al,' '
+		call WriteChar
+		inc dh
+		call Gotoxy
+	LOOP path1d
+
+	;line 5 print... (V-right)
+	mov dl,67
+	mov dh,2
+	mov ecx,0
+	mov cx,13
+	call Gotoxy
+	path1e:
+		mov al,'*'
+		call WriteChar
+		inc dh
+		inc dh
+		call Gotoxy
+	LOOP path1e
+
+	;line 1 print... (top)
+	mov dl,5
+	mov dh,1
+	mov ecx,0
+	mov cx,32
+	call Gotoxy
+	path1a:
+		mov al,'*'
+		call WriteChar
+		inc dl
+		call Gotoxy
+		mov al,' '
+		call WriteChar
+		inc dl
+		call Gotoxy
+	LOOP path1a
+
+	;line 2 print... (bottom)
+	mov dl,5
+	mov dh,27
+	mov ecx,0
+	mov cx,32
+	call Gotoxy
+	path1b:
+		mov al,'*'
+		call WriteChar
+		inc dl
+		call Gotoxy
+		mov al,' '
+		call WriteChar
+		inc dl
+		call Gotoxy
+	LOOP path1b
+
+
+	;line 6 print... (H-mid1)
+	mov dl,5
+	mov dh,4
+	mov ecx,0
+	mov cx,32
+	call Gotoxy
+	path1f:
+		mov al,'*'
+		call WriteChar
+		inc dl
+		call Gotoxy
+		mov al,' '
+		call WriteChar
+		inc dl
+		call Gotoxy
+	LOOP path1f
+
+	;line 7 print... (H-mid2)
+	mov dl,5
+	mov dh,7
+	mov ecx,0
+	mov cx,26
+	call Gotoxy
+	path1g:
+		mov al,'*'
+		call WriteChar
+		inc dl
+		call Gotoxy
+		mov al,' '
+		call WriteChar
+		inc dl
+		call Gotoxy
+	LOOP path1g
+
+	//level 1 x values
+	v-right  : 67
+	v-left   : 5
+	v-middle : 35
+
+	;line 8 print... (H-mid3)
+	mov dl,5
+	mov dh,24
+	mov ecx,0
+	mov cx,26
+	call Gotoxy
+	path1h:
+		mov al,'*'
+		call WriteChar
+		inc dl
+		call Gotoxy
+		mov al,' '
+		call WriteChar
+		inc dl
+		call Gotoxy
+	LOOP path1h
+
+
+ret
+formPath1 endp
+
+
+
+
+......................................................................................................................
+;.................................................
+	;--moving ghost_red
+	cmp eax,0
+	mov al, grX
+	mov ah, grY
+		cmp bl,0
+		je red_up
+			cmp bl,1
+			je red_down
+				cmp bl,2
+				je red_left
+					cmp bl,3
+					je red_right
+
+					red_right:
+					inc al
+					call search_path_point
+					jnc setup_red
+
+				red_left:
+				dec al
+				call search_path_point
+				jnc setup_red
+
+			red_down:
+			dec ah
+			call search_path_point
+			jnc setup_red
+
+		red_up:
+		dec ah
+		call search_path_point
+		jnc setup_red
+
+setup_red:
+mov grX,al
+mov grY,ah
+mov eax,3 ; 0-3 range
+call RandomRange
+mov bl,al ; 0up  1down 2left 3right
+;.................................................
+		;--moving ghost_pink
+	cmp eax,0
+	mov al, gyX
+	mov ah, gyY
+		cmp bl,0
+		je yellow_up
+			cmp bl,1
+			je yellow_down
+				cmp bl,2
+				je yellow_left
+					cmp bl,3
+					je yellow_right
+
+					yellow_right:
+					inc al
+					call search_path_point
+					jnc setup_yellow
+
+				yellow_left:
+				dec al
+				call search_path_point
+				jnc setup_yellow
+
+			yellow_down:
+			dec ah
+			call search_path_point
+			jnc setup_yellow
+
+		yellow_up:
+		dec ah
+		call search_path_point
+		jnc setup_yellow
+
+setup_yellow:
+mov gyX,al
+mov gyY,ah
+mov eax,3 ; 0-3 range
+call RandomRange
+mov bl,al ; 0up  1down 2left 3right
+
+
+
+;...................................
+	
+		mov esi , offset pathx
+		mov edi , offset pathy
+	
+		mov ecx , 0
+		mov ecx , sizeof pathx
+
+		check_if_on_path_xdom:
+
+				;checking x value
+				cmp al,byte ptr [esi]
+				je checkY_vals
+				jmp next_point	
+		
+				
+				checkY_vals:
+					cmp ah,byte ptr[edi]
+					je return_collision
+
+		LOOP check_if_on_path_xdom
+
+
